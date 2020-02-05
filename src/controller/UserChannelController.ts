@@ -57,7 +57,7 @@ export class UserChannelController {
     @Delete("/users/:id/channels/:ch_id")
     async remove(@Req() request: Request, @Res() response: Response) {
         try {
-            let recordToRemove = await this.userChannelRepository.findOne({user: request.params.id, channel: request.params.ch_id});
+            let recordToRemove = await this.userChannelRepository.findOne({where: {user: request.params.id, channel: request.params.ch_id}});
             if (!recordToRemove)
                 throw new NotFoundError('Record was not found.')
             await this.userChannelRepository.remove(recordToRemove);

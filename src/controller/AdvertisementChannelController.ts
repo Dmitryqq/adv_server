@@ -4,6 +4,10 @@ import {User} from "../entity/User";
 import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body } from "routing-controllers";
 import { Advertisement } from "../entity/Advertisement";
 import { AdvertisementChannel } from "../entity/AdvertisementChannel";
+import { Channel } from "../entity/Channel";
+import { Tariff } from "../entity/Tariff";
+import { Status } from "../entity/Status";
+import { ChannelTariff } from "../entity/ChannelTariff";
 
 @JsonController()
 export class AdvertisementChannelController {
@@ -11,6 +15,10 @@ export class AdvertisementChannelController {
     private adsRepository = getRepository(Advertisement);
     private adsChannelRepository = getRepository(AdvertisementChannel);
     private userRepository = getRepository(User);
+    private channelRepository = getRepository(Channel);
+    private tariffRepostory = getRepository(Tariff);
+    private statusRepostory = getRepository(Status);
+    private channelTariffRepostory = getRepository(ChannelTariff);
 
     @Get("/ads/:id/channel")
     async all(@Req() request: Request, @Res() response: Response, next: NextFunction) {
@@ -51,18 +59,24 @@ export class AdvertisementChannelController {
     //     }
     // }
 
-    // @Post("/ads")
-    // async save(@Body({ required: true }) ad: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
-    //     try{
-    //         console.log(request.body)
-    //         let ad = request.body
-    //         ad.user = await this.userRepository.findOne(request.body.userId)
-    //         return this.adsRepository.save(ad);
-    //     }
-    //     catch(e){
-    //         return response.status(e.httpCode).json({message: e.message})
-    //     }
-    // }
+    @Post("/ads/:id/channel")
+    async save(@Body({ required: true }) ad: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
+        try{
+            let channelTariff = await this.channelTariffRepostory.findOne({channel: request.body.channelId, tariff: request.body.tariffId})
+            if(!channelTariff)
+                throw new NotFoundError('Channel tariff was not found.')
+            let adChannel = request.body
+            adChannel.channel = await this.channelRepository.findOne(request.body.channelId)
+            adChannel.agent = await this.userRepository.findOne(request.body.userId)
+            adChannel.tariff = await this.tariffRepostory.findOne(request.body.tariffId)
+            adChannel.status = await this.statusRepostory.findOne(request.body.statusId)
+            adChannel.advertisement = await this.adsRepository.findOne(request.params.id)
+            return this.adsChannelRepository.save(adChannel);
+        }
+        catch(e){
+            return response.status(e.httpCode).json({message: e.message})
+        }
+    }
 
     // @Delete("/ads/:id")
     // async remove(@Req() request: Request, @Res() response: Response, next: NextFunction) {

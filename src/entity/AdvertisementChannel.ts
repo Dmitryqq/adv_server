@@ -34,11 +34,6 @@ export class AdvertisementChannel {
     tariff: Tariff;
 
     @Column({
-        nullable: false
-    })
-    dates: string;
-
-    @Column({
         type: 'double',
         nullable: false,
         unsigned: true

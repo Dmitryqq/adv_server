@@ -57,7 +57,7 @@ export class ChannelTariffController {
     @Delete("/channel/:id/tariffs/:t_id")
     async remove(@Req() request: Request, @Res() response: Response) {
         try {
-            let recordToRemove = await this.channelTariffRepository.findOne({channel: request.params.id, tariff: request.params.t_id});
+            let recordToRemove = await this.channelTariffRepository.findOne({where: {channel: request.params.id, tariff: request.params.t_id}});
             if (!recordToRemove)
                 throw new NotFoundError('Record was not found.')
             await this.channelTariffRepository.remove(recordToRemove);

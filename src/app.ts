@@ -2,8 +2,6 @@ import "reflect-metadata";
 import {createConnection} from "typeorm";
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import {Request, Response} from "express";
-import {Routes} from "./routes";
 import "reflect-metadata";
 import {createExpressServer} from "routing-controllers";
 import {UserController} from "./controller/UserController";
@@ -15,6 +13,8 @@ import { ChannelController } from "./controller/ChannelController";
 import { UserChannelController } from "./controller/UserChannelController";
 import { ChannelTariffController } from "./controller/ChannelTariffController";
 import { AdvertisementChannelController } from "./controller/AdvertisementChannelController";
+import { AdvertisementDateController } from "./controller/AdvertisementDateController";
+const cors = require('cors')
 
 const PORT = 5000;
 
@@ -22,6 +22,7 @@ createConnection().then(async connection => {
 
     // create express app
     const app = createExpressServer({
+        cors: true,
         controllers: [
             RoleController, 
             UserController, 
@@ -31,7 +32,8 @@ createConnection().then(async connection => {
             ChannelController,
             UserChannelController,
             ChannelTariffController,
-            AdvertisementChannelController
+            AdvertisementChannelController,
+            AdvertisementDateController
         ]
     });
     // console.log(__dirname + "../controller/*.js")
