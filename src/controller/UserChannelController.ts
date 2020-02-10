@@ -21,6 +21,7 @@ export class UserChannelController {
                 .where("userChannel.userId = :id", {id: request.params.id})
                 .leftJoinAndSelect("userChannel.channel", "channel")
                 .getMany()
+            console.log("userchannels")
             return userChannels;
         }
         catch(e){

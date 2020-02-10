@@ -23,7 +23,6 @@ export class AdvertisementChannelController {
     @Get("/ads/:id/channel")
     async all(@Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            // const ads = await this.adsRepository.find({ relations: ["user"] });
             const adsChannels = this.adsChannelRepository
                 .createQueryBuilder("adsChannels")
                 .where("adsChannels.advertisementId = :id", {id: request.params.id})

@@ -1,8 +1,8 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index} from "typeorm";
-import { Advertisement } from "./Advertisement";
+import { AdvertisementChannel } from "./AdvertisementChannel";
 
-@Entity({name: "adv_date"})
-@Index(["date", "advertisement"],{ unique: true })
+@Entity({name: "adv_channel_date"})
+@Index(["date", "advertisementchannel"],{ unique: true })
 export class AdvertisementDate {
 
     @PrimaryGeneratedColumn()
@@ -14,10 +14,10 @@ export class AdvertisementDate {
     })
     date;
 
-    @ManyToOne(() => Advertisement, advertisement => advertisement.id, {
+    @ManyToOne(() => AdvertisementChannel, advertisementchannel => advertisementchannel.id, {
         nullable: false,
         cascade: true
     })
     @JoinColumn()
-    advertisement: Advertisement;
+    advertisementchannel: AdvertisementChannel;
 }

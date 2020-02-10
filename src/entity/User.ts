@@ -1,5 +1,6 @@
 import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne, JoinTable, OneToMany, Double, Index} from "typeorm";
 import {Role} from "./Role"
+import * as bcrypt from "bcryptjs";
 
 @Entity({name: "users"})
 export class User {
@@ -64,6 +65,13 @@ export class User {
     @Column({ type: "datetime", nullable: true, default: null})
     update_date: Date;
 
+    hashPassword() {
+        this.password = bcrypt.hashSync(this.password, 8);
+    }
+
+    checkIfUnencryptedPasswordIsValid(unencryptedPassword: string) {
+        return bcrypt.compareSync(unencryptedPassword, this.password);
+    }
     // @Column({
     //     nullable: false
     // })

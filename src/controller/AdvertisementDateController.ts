@@ -1,25 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 import { Body, Get, JsonController, NotFoundError, Post, Req, Res } from "routing-controllers";
 import { getRepository } from "typeorm";
-import { Advertisement } from "../entity/Advertisement";
 import { AdvertisementDate } from "../entity/AdvertisementDate";
+import { AdvertisementChannel } from "../entity/AdvertisementChannel";
 
 @JsonController()
 export class AdvertisementDateController {
 
-    private adsRepository = getRepository(Advertisement);
+    private adsChannelRepository = getRepository(AdvertisementChannel);
     private adsDateRepository = getRepository(AdvertisementDate);
 
     @Get("/ads/:id/date")
     async all(@Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            const advertisement = await this.adsRepository.findOne(request.params.id);
-            if(!advertisement)
-                throw new NotFoundError('Advertisement tariff was not found.')
+            const adChannel = await this.adsChannelRepository.findOne({where: {advertisement: request.params.id}});
+            if(!adChannel)
+                throw new NotFoundError('Advertisement-channel was not found.')
             // const ads = await this.adsRepository.find({ relations: ["user"] });
             const adDates = this.adsDateRepository
                 .createQueryBuilder("adDates")
-                .where("adDates.advertisementId = :id", {id: request.params.id})
+                .where("adDates.advertisementChannelId = :id", {id: adChannel.id})
                 // .leftJoinAndSelect("adsDates.advertisement", "advertisement")
                 .getMany()
             return adDates;
@@ -51,15 +51,19 @@ export class AdvertisementDateController {
     @Post("/ads/:id/date")
     async save(@Body({ required: true }) ad: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            const advertisement = await this.adsRepository.findOne(request.params.id);
-            if(!advertisement)
-                throw new NotFoundError('Advertisement tariff was not found.')
+            const adChannel = await this.adsChannelRepository.findOne({where: {advertisement: request.params.id}});
+            if(!adChannel)
+                throw new NotFoundError('Advertisement-channel was not found.')
             let adDates = request.body;
-            console.log(adDates)
-            adDates.forEach(async element => {
-                element.advertisement = advertisement;
-                await this.adsDateRepository.save(element);
-            });
+            for(let element of adDates){
+                element.advertisementchannel = adChannel;
+                try {
+                    await this.adsDateRepository.save(element)
+                }
+                catch(e){
+                    return response.status(406).json({message: e.message})
+                }
+            };
             // return this.adsDateRepository.save(adDates);
             return response.json({message: "Nice"})
         }

@@ -2,7 +2,9 @@ import {getRepository} from "typeorm";
 import {NextFunction, Request, Response} from "express";
 import {User} from "../entity/User";
 import { Role } from "../entity/Role";
-import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body } from "routing-controllers";
+import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body, UseBefore, Authorized } from "routing-controllers";
+import * as bcrypt from "bcryptjs";
+import { checkJwt } from "../middlewares/checkJWT";
 
 @JsonController()
 export class UserController {
@@ -11,10 +13,13 @@ export class UserController {
     private roleRepository = getRepository(Role);
 
     @Get("/users")
+    @UseBefore(checkJwt)
+    @Authorized(["Главный администратор"])
     async all(@Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
             const users = await this.userRepository.find({ relations: ["role"] });
-            return users;
+            // response.status(200).send(users);
+            return response.status(200).send(users);
         }
         catch(e){
             return response.status(e.httpCode).json({message: e.message})
@@ -37,14 +42,39 @@ export class UserController {
     @Post("/users")
     async save(@Body({ required: true }) user: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            let user = request.body
-            user.role = await this.roleRepository.findOne(request.body.roleId)
-            if(user.id)
-                user.update_date = new Date().toLocaleString();
-            return this.userRepository.save(user);
+            let user = new User();
+            let { id, roleId, username, password, name, phone, email } = request.body;
+            user.id = id;
+            user.username = username;
+            user.name = name;
+            user.phone = phone;
+            user.email = email;
+            user.role = await this.roleRepository.findOne(roleId);
+            user.password = password;
+            user.hashPassword();
+            console.log(user)
+            await this.userRepository.save(user);
+            return response.status(200).json({message: "Nice"});
+            // let user = new User();
+            // user = request.body
+            // if(user.role) 
+            //     user.role = await this.roleRepository.findOne(request.body.roleId)
+            // if(user.id)
+            //     user.update_date = new Date();
+            // if(user.password){
+            //     user.password = request.body.password;
+            //     console.log(user.password);
+            //     user.hashPassword();
+            //     console.log(user.password);
+            //     // user.password = password;
+            // }
+            // return await this.userRepository.save(user);
+            // // return response.status(200).json({message: "Nice"});
         }
         catch(e){
-            return response.status(e.httpCode).json({message: e.message})
+            if(e.httpCode)
+                return response.status(e.httpCode).json({message: e.message})
+            return response.json({message: e.message})
         }
     }
 
