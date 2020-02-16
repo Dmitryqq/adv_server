@@ -18,7 +18,6 @@ export const checkRole = async (action: Action, roles: Array<string>) => {
     } catch (id) {
       return false;
     }
-    console.log(user.role)
     if (user && !roles.length)
         return true;
     //Check if array of authorized roles includes the user's role

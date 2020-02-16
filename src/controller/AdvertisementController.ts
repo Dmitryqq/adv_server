@@ -1,8 +1,9 @@
 import {getRepository} from "typeorm";
 import {NextFunction, Request, Response} from "express";
 import {User} from "../entity/User";
-import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body } from "routing-controllers";
+import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body, UseBefore, Authorized } from "routing-controllers";
 import { Advertisement } from "../entity/Advertisement";
+import { checkJwt, extractTokenFromHeader } from "../middlewares/checkJWT";
 
 @JsonController()
 export class AdvertisementController {
@@ -46,11 +47,12 @@ export class AdvertisementController {
     }
 
     @Post("/ads")
+    @UseBefore(checkJwt)
+    @Authorized(["Главный администратор", "Рекламодатель"])
     async save(@Body({ required: true }) ad: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            console.log(request.body)
             let ad = request.body
-            ad.user = await this.userRepository.findOne(request.body.userId)
+            ad.user = await this.userRepository.findOneOrFail({ where: { id: response.locals.jwtPayload.userId } })
             return this.adsRepository.save(ad);
         }
         catch(e){

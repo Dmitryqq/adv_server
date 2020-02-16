@@ -61,7 +61,7 @@ export class AdvertisementChannelController {
     @Post("/ads/:id/channel")
     async save(@Body({ required: true }) ad: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            let channelTariff = await this.channelTariffRepostory.findOne({channel: request.body.channelId, tariff: request.body.tariffId})
+            let channelTariff = await this.channelTariffRepostory.findOne({where: {channel: request.body.channelId, tariff: request.body.tariffId}})
             if(!channelTariff)
                 throw new NotFoundError('Channel tariff was not found.')
             let adChannel = request.body
@@ -70,6 +70,7 @@ export class AdvertisementChannelController {
             adChannel.tariff = await this.tariffRepostory.findOne(request.body.tariffId)
             adChannel.status = await this.statusRepostory.findOne(request.body.statusId)
             adChannel.advertisement = await this.adsRepository.findOne(request.params.id)
+            adChannel.total_price = 0
             return this.adsChannelRepository.save(adChannel);
         }
         catch(e){

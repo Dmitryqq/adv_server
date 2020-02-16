@@ -18,7 +18,8 @@ import helmet = require("helmet");
 import { AuthController } from "./controller/AuthController";
 import { checkRole } from "./middlewares/checkRole";
 
-const PORT = 5000;
+const PORT = 3000;
+
 
 createConnection().then(async connection => {
 
@@ -37,12 +38,35 @@ createConnection().then(async connection => {
             AdvertisementDateController,
             AuthController
         ],
+        routePrefix: '/api',
         authorizationChecker: checkRole
     });
-    
-    // app.use(helmet());
-    app.use(bodyParser.json());
+    // app.use(function (req, res, next) {
 
+    //     // Website you wish to allow to connect
+    //     res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    //     // Request methods you wish to allow
+    //     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    
+    //     // Request headers you wish to allow
+    //     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    
+    //     // Set to true if you need the website to include cookies in the requests sent
+    //     // to the API (e.g. in case you use sessions)
+    //     res.setHeader('Access-Control-Allow-Credentials', true);
+    
+    //     // Pass to next layer of middleware
+    //     next();
+    // });
+
+    
+    // app.use('/', express.static('dist'));
+    // app.use('/create', express.static('dist'));
+    // app.use('/users', express.static('dist'));
+    // app.use(helmet());
+    app.use('/uploads', express.static('uploads'));
+    app.use(bodyParser.json());
     app.listen(PORT);
 
     console.log(`Express server has started on port ${PORT}.`);

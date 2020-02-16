@@ -3,7 +3,6 @@ import {NextFunction, Request, Response} from "express";
 import {User} from "../entity/User";
 import { Role } from "../entity/Role";
 import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body, UseBefore, Authorized } from "routing-controllers";
-import * as bcrypt from "bcryptjs";
 import { checkJwt } from "../middlewares/checkJWT";
 
 @JsonController()

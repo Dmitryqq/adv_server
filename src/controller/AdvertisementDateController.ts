@@ -51,24 +51,21 @@ export class AdvertisementDateController {
     @Post("/ads/:id/date")
     async save(@Body({ required: true }) ad: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            const adChannel = await this.adsChannelRepository.findOne({where: {advertisement: request.params.id}});
+            const adChannel = await this.adsChannelRepository.findOne({where: {id: request.params.id}});
             if(!adChannel)
                 throw new NotFoundError('Advertisement-channel was not found.')
-            let adDates = request.body;
-            for(let element of adDates){
-                element.advertisementchannel = adChannel;
-                try {
-                    await this.adsDateRepository.save(element)
-                }
-                catch(e){
-                    return response.status(406).json({message: e.message})
-                }
+            for(let date of request.body.dates){
+                let adDate = new AdvertisementDate();
+                adDate.date = date.split('T')[0];
+                adDate.advertisementchannel = adChannel;
+                await this.adsDateRepository.save(adDate)
             };
             // return this.adsDateRepository.save(adDates);
             return response.json({message: "Nice"})
         }
         catch(e){
-            return response.status(e.httpCode).json({message: e.message})
+            console.log(e.message)
+            // return response.status(e.httpCode).json({message: e.message})
         }
     }
 

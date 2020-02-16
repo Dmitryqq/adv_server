@@ -1,7 +1,7 @@
 import {getRepository} from "typeorm";
 import {Request, Response} from "express";
 import {User} from "../entity/User";
-import { JsonController, Get, Post, Delete, NotFoundError, Req, Res } from "routing-controllers";
+import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body } from "routing-controllers";
 import { Channel } from "../entity/Channel";
 import { UserChannel } from "../entity/UserChannel";
 
@@ -12,8 +12,9 @@ export class UserChannelController {
     private channelRepository = getRepository(Channel);
     private userChannelRepository = getRepository(UserChannel);
 
+    //Мои каналы
     @Get("/users/:id/channels")
-    async all(@Req() request: Request, @Res() response: Response) {
+    async usersChannel(@Req() request: Request, @Res() response: Response) {
         try{
             // const userChannels = await this.userChannelRepository.find(request.params.id,);
             const userChannels = this.userChannelRepository
@@ -21,7 +22,6 @@ export class UserChannelController {
                 .where("userChannel.userId = :id", {id: request.params.id})
                 .leftJoinAndSelect("userChannel.channel", "channel")
                 .getMany()
-            console.log("userchannels")
             return userChannels;
         }
         catch(e){
@@ -29,6 +29,21 @@ export class UserChannelController {
         }
     }
 
+    @Get("/all/users/channels")
+    async all(@Req() request: Request, @Res() response: Response) {
+        try{
+            const userChannels = this.userChannelRepository
+                .createQueryBuilder("userChannel")
+                .leftJoinAndSelect("userChannel.channel", "channel")
+                .leftJoinAndSelect("userChannel.user", "user")
+                .orderBy("userChannel.id")
+                .getMany()
+            return userChannels;
+        }
+        catch(e){
+            return response.status(e.httpCode).json({message: e.message})
+        }
+    }
     // @Get("/users/:id")
     // async one(@Req() request: Request, @Res() response: Response, next: NextFunction) {
     //     try{
@@ -43,15 +58,17 @@ export class UserChannelController {
     // }
 
     @Post("/users/:id/channels")
-    async save(@Req() request: Request, @Res() response: Response) {
+    async save(@Body({ required: true }) userChannel: any,@Req() request: Request, @Res() response: Response) {
         try{
+            console.log(request.body)
             let userChannel = request.body
             userChannel.user = await this.userRepository.findOne(request.params.id)
             userChannel.channel = await this.channelRepository.findOne(request.body.channelId)
             return this.userChannelRepository.save(userChannel);
         }
         catch(e){
-            return response.status(e.httpCode).json({message: e.message})
+            return response.json({message: e.message})
+            // return response.status(e.httpCode).json({message: e.message})
         }
     }
 
