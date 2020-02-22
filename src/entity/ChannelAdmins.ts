@@ -2,9 +2,9 @@ import {Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne, Index} from "type
 import {User} from "./User"
 import { Channel } from "./Channel";
 
-@Entity({name: "users_channels"})
+@Entity({name: "channel_admins"})
 @Index(["user", "channel"],{ unique: true })
-export class UserChannel {
+export class ChannelAdmins {
 
     @PrimaryGeneratedColumn()
     id: number;

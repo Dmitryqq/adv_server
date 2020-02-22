@@ -20,7 +20,6 @@ export class AuthController {
             if (!(username && password)) {
                 throw new NotFoundError("No body");
             }
-
             let user: User;
             try {
                 user = await this.userRepository.findOneOrFail({ where: { username }, relations: ["role"] });
@@ -28,6 +27,7 @@ export class AuthController {
                 throw new NotFoundError("No such user");
             }
 
+            
             //Check if encrypted password match
             if (!user.checkIfUnencryptedPasswordIsValid(password)) {
                 throw new NotFoundError("Wrong password");

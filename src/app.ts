@@ -10,13 +10,14 @@ import { AdvertisementController } from "./controller/AdvertisementController";
 import { StatusController } from "./controller/StatusController";
 import { TariffController } from "./controller/TariffController";
 import { ChannelController } from "./controller/ChannelController";
-import { UserChannelController } from "./controller/UserChannelController";
+import { ChannelAdminsController } from "./controller/ChannelAdminsController";
 import { ChannelTariffController } from "./controller/ChannelTariffController";
 import { AdvertisementChannelController } from "./controller/AdvertisementChannelController";
 import { AdvertisementDateController } from "./controller/AdvertisementDateController";
 import helmet = require("helmet");
 import { AuthController } from "./controller/AuthController";
 import { checkRole } from "./middlewares/checkRole";
+import { ChannelAgentsController } from "./controller/ChannelAgentsController";
 
 const PORT = 3000;
 
@@ -32,11 +33,12 @@ createConnection().then(async connection => {
             StatusController,
             TariffController,
             ChannelController,
-            UserChannelController,
+            ChannelAdminsController,
             ChannelTariffController,
             AdvertisementChannelController,
             AdvertisementDateController,
-            AuthController
+            AuthController,
+            ChannelAgentsController
         ],
         routePrefix: '/api',
         authorizationChecker: checkRole
