@@ -1,10 +1,12 @@
 import {getRepository} from "typeorm";
 import {Request, Response} from "express";
 import {User} from "../entity/User";
-import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body } from "routing-controllers";
+import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body, UseBefore } from "routing-controllers";
 import { Channel } from "../entity/Channel";
 import { ChannelTariff } from "../entity/ChannelTariff";
 import { Tariff } from "../entity/Tariff";
+import { checkJwt } from "../middlewares/checkJWT";
+import { ChannelAgents } from "../entity/ChannelAgents";
 
 @JsonController()
 export class ChannelTariffController {
@@ -12,14 +14,18 @@ export class ChannelTariffController {
     private channelTariffRepository = getRepository(ChannelTariff);
     private tariffRepository = getRepository(Tariff);
     private channelRepository = getRepository(Channel);
+    private channelAgentsRepository = getRepository(ChannelAgents);
 
-    @Get("/channels/:id/tariffs")
+    @Get("/my/channels/tariffs")
+    @UseBefore(checkJwt)
     async forOneChannel(@Req() request: Request, @Res() response: Response) {
         try{
-            const channelTariff = this.channelTariffRepository
-                .createQueryBuilder("channelTariff")
-                .where("channelTariff.channelId = :id", {id: request.params.id})
+            const channelTariff = this.channelTariffRepository.createQueryBuilder("channelTariff")
                 .leftJoinAndSelect("channelTariff.tariff", "tariff")
+                .leftJoinAndSelect("channelTariff.channel", "channel")
+                .leftJoinAndMapMany("channelTariff.channel_agents", ChannelAgents, "channel_agents", "channel_agents.channelId = channelTariff.channelId")
+                .leftJoin("channel_agents.user", "user")
+                .where("user.id = :id", {id: response.locals.jwtPayload.userId})
                 .getMany()
             return channelTariff;
         }

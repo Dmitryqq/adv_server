@@ -25,10 +25,11 @@ export class UserController {
         }
     }
 
-    @Get("/users/:id")
+    @Get("/users/account")
+    @UseBefore(checkJwt)
     async one(@Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            let user = await this.userRepository.findOne(request.params.id, { relations: ["role"] });
+            let user = await this.userRepository.findOne({ where: {id: response.locals.jwtPayload.userId}, relations: ["role"] });
             if (!user)
                 throw new NotFoundError('User was not found.')
             return user;

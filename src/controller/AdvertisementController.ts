@@ -3,19 +3,17 @@ import {NextFunction, Request, Response} from "express";
 import {User} from "../entity/User";
 import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body, UseBefore, Authorized } from "routing-controllers";
 import { Advertisement } from "../entity/Advertisement";
-import { checkJwt, extractTokenFromHeader } from "../middlewares/checkJWT";
+import { checkJwt } from "../middlewares/checkJWT";
 import { AdvertisementChannel } from "../entity/AdvertisementChannel";
-import { Channel } from "../entity/Channel";
-import { Tariff } from "../entity/Tariff";
-import { Status } from "../entity/Status";
-import { Agent } from "http";
 import { AdvertisementDate } from "../entity/AdvertisementDate";
+import { ChannelAgents } from "../entity/ChannelAgents";
 
 @JsonController()
 export class AdvertisementController {
 
     private adsRepository = getRepository(Advertisement);
     private userRepository = getRepository(User);
+    private channelAgentsRepository = getRepository(ChannelAgents);
 
     @Get("/ads")
     async all(@Req() request: Request, @Res() response: Response, next: NextFunction) {
@@ -47,18 +45,32 @@ export class AdvertisementController {
                 .leftJoinAndSelect("adv_channels.status", "status")
                 .leftJoinAndSelect("adv_channels.agent", "agent")
                 .leftJoinAndMapMany("adv_channels.dates", AdvertisementDate, "adv_dates", "adv_dates.advertisementchannelId = adv_channels.id")
-                // .leftJoinAndMapMany("ad.adv_channels.channel", Channel, "channel", "adv_channels.channelId = channel.id")
-                // .leftJoinAndMapMany("ad.tariff", Tariff, "tariff", "adv_channels.tariffId = tariff.id")
-                // .leftJoinAndMapMany("ad.status", Status, "status", "adv_channels.statusId = status.id")
-                // .leftJoinAndMapMany("ad.agent", User, "agent", "adv_channels.agentId = agent.id")
-                // .groupBy("ad.id")
-                // .andWhere("channel.id = ad.id")
-                // .innerJoinAndSelect(AdvertisementChannel, "ad.channel", "ad.channel.advertisementId = ad.id")
-                // .innerJoin("ad.channel", "channel")
-                // .where("channel.advertisementId = ad.id")
-                // .printSql()
                 .getMany()
             return ads;
+        }
+        catch(e){
+            console.log(e.message)
+            return response.status(e.httpCode).json({message: e.message})
+        }
+    }
+
+    @Get("/adsonmychannel")
+    @UseBefore(checkJwt)
+    async agentsAds(@Req() request: Request, @Res() response: Response, next: NextFunction) {
+        try{
+            const channelAgents = this.channelAgentsRepository
+                .createQueryBuilder("channelAgents")
+                .leftJoinAndSelect("channelAgents.channel", "channel")
+                .where("channelAgents.userId = :id", {id: response.locals.jwtPayload.userId})
+                .leftJoinAndMapMany("channel.adv_channels", AdvertisementChannel, "adv_channels", "channelAgents.channelId = adv_channels.channelId")
+                .leftJoinAndSelect("adv_channels.advertisement", "advertisement")
+                // .leftJoinAndSelect("adv_channels.channel", "adchannel")
+                .leftJoinAndSelect("adv_channels.status", "status")
+                .leftJoinAndSelect("adv_channels.tariff", "tariff")
+                .leftJoinAndSelect("adv_channels.agent", "agent")
+                .leftJoinAndMapMany("adv_channels.dates", AdvertisementDate, "adv_dates", "adv_dates.advertisementchannelId = adv_channels.id")
+                .getMany()
+            return channelAgents;
         }
         catch(e){
             console.log(e.message)

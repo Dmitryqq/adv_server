@@ -1,9 +1,10 @@
 import {getRepository} from "typeorm";
 import {Request, Response} from "express";
 import {User} from "../entity/User";
-import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body } from "routing-controllers";
+import { JsonController, Get, Post, Delete, NotFoundError, Req, Res, Body, UseBefore } from "routing-controllers";
 import { Channel } from "../entity/Channel";
 import { ChannelAgents } from "../entity/ChannelAgents";
+import { checkJwt } from "../middlewares/checkJWT";
 
 @JsonController()
 export class ChannelAgentsController {
@@ -13,20 +14,22 @@ export class ChannelAgentsController {
     private channelAgentsRepository = getRepository(ChannelAgents);
 
     //Мои каналы
-    @Get("/users/:id/channels")
+    @Get("/agent/mychannels")
+    @UseBefore(checkJwt)
     async usersChannel(@Req() request: Request, @Res() response: Response) {
         try{
             const channelAgents = this.channelAgentsRepository
-                .createQueryBuilder("ChannelAgents")
-                .where("ChannelAgents.userId = :id", {id: request.params.id})
-                .leftJoinAndSelect("ChannelAgents.channel", "channel")
+                .createQueryBuilder("channelAgents")
+                .where("channelAgents.userId = :id", {id: response.locals.jwtPayload.userId})
+                .leftJoinAndSelect("channelAgents.channel", "channel")
                 .getMany()
-            return ChannelAgents;
+            return channelAgents;
         }
         catch(e){
             return response.status(e.httpCode).json({message: e.message})
         }
     }
+    
 
     @Get("/all/channels/agents")
     async all(@Req() request: Request, @Res() response: Response) {
