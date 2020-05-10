@@ -39,6 +39,20 @@ export class UserController {
         }
     }
 
+    @Get("/users/balance")
+    @UseBefore(checkJwt)
+    async balance(@Req() request: Request, @Res() response: Response, next: NextFunction) {
+        try{
+            let user = await this.userRepository.findOne({ where: {id: response.locals.jwtPayload.userId}, relations: ["role"] });
+            if (!user)
+                throw new NotFoundError('User was not found.')
+            return user.balance;
+        }
+        catch(e){
+            return response.status(e.httpCode).json({message: e.message})
+        }
+    }
+
     @Post("/users")
     async save(@Body({ required: true }) user: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{

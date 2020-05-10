@@ -66,7 +66,7 @@ export class AdvertisementChannelController {
                 throw new NotFoundError('Channel tariff was not found.')
             let adChannel = request.body
             adChannel.channel = await this.channelRepository.findOne(request.body.channelId)
-            adChannel.agent = await this.userRepository.findOne(request.body.userId)
+            // adChannel.agent = await this.userRepository.findOne(request.body.userId)
             adChannel.tariff = await this.tariffRepostory.findOne(request.body.tariffId)
             adChannel.status = await this.statusRepostory.findOne(request.body.statusId)
             adChannel.advertisement = await this.adsRepository.findOne(request.params.id)

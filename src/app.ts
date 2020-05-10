@@ -16,6 +16,7 @@ import { AdvertisementChannelController } from "./controller/AdvertisementChanne
 import { AdvertisementDateController } from "./controller/AdvertisementDateController";
 import helmet = require("helmet");
 import { AuthController } from "./controller/AuthController";
+import { NotificationController } from "./controller/NotificationController";
 import { checkRole } from "./middlewares/checkRole";
 import { ChannelAgentsController } from "./controller/ChannelAgentsController";
 
@@ -38,7 +39,8 @@ createConnection().then(async connection => {
             AdvertisementChannelController,
             AdvertisementDateController,
             AuthController,
-            ChannelAgentsController
+            ChannelAgentsController,
+            NotificationController
         ],
         routePrefix: '/api',
         authorizationChecker: checkRole
