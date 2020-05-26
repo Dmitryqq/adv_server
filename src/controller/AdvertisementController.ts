@@ -73,7 +73,6 @@ export class AdvertisementController {
             return channelAgents;
         }
         catch(e){
-            console.log(e.message)
             return response.status(e.httpCode).json({message: e.message})
         }
     }

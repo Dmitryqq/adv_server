@@ -19,6 +19,7 @@ import { AuthController } from "./controller/AuthController";
 import { NotificationController } from "./controller/NotificationController";
 import { checkRole } from "./middlewares/checkRole";
 import { ChannelAgentsController } from "./controller/ChannelAgentsController";
+import { Statistics } from "./controller/Statistics";
 
 const PORT = 3000;
 
@@ -40,7 +41,8 @@ createConnection().then(async connection => {
             AdvertisementDateController,
             AuthController,
             ChannelAgentsController,
-            NotificationController
+            NotificationController,
+            Statistics
         ],
         routePrefix: '/api',
         authorizationChecker: checkRole

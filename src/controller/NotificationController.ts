@@ -15,10 +15,16 @@ export class NotificationController {
     @Get("/notifications")
     async one(@Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
-            let notifications = await this.notificationRepository.find({ where: { userId: response.locals.jwtPayload.userId}, order: {id: "DESC"}});
+            // let notifications = await this.notificationRepository.find({ where: { userId: response.locals.jwtPayload.userId}, relations: ["user"] , order: {id: "DESC"}});
+            let notifications = await this.notificationRepository.createQueryBuilder("notifications")
+                    .leftJoinAndSelect("notifications.user", "user")
+                    .where("user.id = :id", {id: response.locals.jwtPayload.userId})
+                    .orderBy("notifications.id", "DESC")
+                    .getMany();
             return notifications;
         }
         catch(e){
+            console.log(e)
             return response.status(e.httpCode).json({message: e.message})
         }
     }

@@ -57,11 +57,12 @@ export class UserController {
     async save(@Body({ required: true }) user: any, @Req() request: Request, @Res() response: Response, next: NextFunction) {
         try{
             let user = new User();
-            let { id, roleId, username, password, name, phone, email } = request.body;
+            let { id, roleId, username, password, name, phone, email, balance } = request.body;
             user.id = id;
             user.username = username;
             user.name = name;
             user.phone = phone;
+            user.balance = balance? balance: 0;
             user.email = email;
             user.role = await this.roleRepository.findOne(roleId);
             user.password = password;

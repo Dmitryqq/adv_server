@@ -23,6 +23,14 @@ export class Channel {
     logo;
 
     @Column({
+        type: 'double',
+        nullable: false,
+        default: 0,
+        unsigned: true
+    })
+    balance;
+
+    @Column({
         nullable: false
     })
     max_ads_per_day: number;
